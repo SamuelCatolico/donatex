@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DonaTex – App de Donación de Ropa</title>
+<style>
+  :root {
+    --navy: #1a2a5e;
+    --teal: #0e9e8e;
+    --teal-light: #14c4b0;
+    --accent: #e8f4f3;
+    --red: #c0392b;
+    --orange: #e67e22;
+    --white: #fff;
+    --gray: #f0f4f8;
+    --text: #222;
+    --border: #d0dde8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    background: var(--gray);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── PHONE SHELL ── */
+  .shell {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0e9e8e 0%, #1a2a5e 60%, #0a1a3e 100%);
+  }
+
+  .phone {
+    width: 390px;
+    min-height: 720px;
+    background: var(--white);
+    border-radius: 44px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 8px #111, 0 0 0 10px #333;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notch {
+    background: #111;
+    height: 28px;
+    border-radius: 0 0 18px 18px;
+    width: 130px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Comic Sans MS', cursive;
+  }
+
+  /* ── TOP NAV ── */
+  .top-nav {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-nav .logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--teal-light);
+    letter-spacing: 1px;
+  }
+  .top-nav .icon-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .top-nav .icon-btn:hover { background: var(--teal); }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; flex: 1; overflow-y: auto; }
+  .screen.active { display: flex; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    background: var(--navy);
+    display: flex;
+    padding: 8px 0 12px;
+    border-top: 2px solid var(--teal);
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    font-size: 10px;
+    font-family: 'Comic Sans MS', cursive;
+    transition: color .2s;
+    padding: 4px 0;
+    border: none;
+    background: none;
+  }
+  .nav-item.active, .nav-item:hover { color: var(--teal-light); }
+  .nav-item .icon { font-size: 20px; }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login {
+    background: linear-gradient(180deg, var(--navy) 0%, #1e3a6a 40%, var(--accent) 100%);
+    padding: 30px 28px;
+    gap: 18px;
+  }
+  .login-logo { text-align: center; margin: 10px 0 6px; }
+  .login-logo h1 { font-size: 42px; color: var(--teal-light); font-family: 'Comic Sans MS', cursive; }
+  .login-logo p { color: rgba(255,255,255,0.7); font-size: 13px; }
+  .login-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .login-card h2 { font-size: 18px; color: var(--navy); margin-bottom: 16px; text-align:center; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 14px;
+    outline: none;
+    transition: border .2s;
+    color: var(--text);
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--teal); }
+  .strength-bar { height: 5px; border-radius: 3px; margin-top: 5px; background: #ddd; overflow: hidden; }
+  .strength-fill { height: 100%; border-radius: 3px; background: var(--teal); width: 70%; }
+  .strength-label { font-size: 10px; color: var(--teal); margin-top: 2px; }
+  .btn-primary {
+    width: 100%; padding: 12px;
+    background: var(--teal);
+    color: #fff;
+    border: none; border-radius: 14px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    margin-bottom: 10px;
+  }
+  .btn-primary:hover { background: var(--navy); transform: scale(1.02); }
+  .btn-social {
+    width: 100%; padding: 10px;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 8px;
+    transition: border .2s, background .2s;
+  }
+  .btn-social:hover { border-color: var(--teal); background: var(--accent); }
+  .login-footer { text-align: center; font-size: 12px; color: rgba(255,255,255,0.7); }
+  .login-footer a { color: var(--teal-light); cursor: pointer; text-decoration: underline; }
+  .divider { text-align: center; font-size: 12px; color: #999; margin: 8px 0; position: relative; }
+  .divider::before, .divider::after {
+    content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  /* ── EXPLORE SCREEN ── */
+  #screen-explore { background: var(--gray); }
+  .search-bar-wrap { background: var(--navy); padding: 10px 16px 16px; }
+  .search-input-row {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 8px 14px;
+  }
+  .search-input-row input {
+    background: none; border: none; color: #fff; font-family: 'Comic Sans MS', cursive;
+    font-size: 14px; flex: 1; outline: none;
+  }
+  .search-input-row input::placeholder { color: rgba(255,255,255,0.5); }
+  .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; }
+  .chip {
+    padding: 5px 14px; border-radius: 20px;
+    background: #fff; border: 2px solid var(--border);
+    font-family: 'Comic Sans MS', cursive; font-size: 12px;
+    cursor: pointer; white-space: nowrap; transition: all .2s;
+  }
+  .chip.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .sort-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 16px 8px;
+    font-size: 12px; color: #666;
+  }
+  .sort-row select {
+    font-family: 'Comic Sans MS', cursive; font-size: 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 3px 8px; background: #fff; color: var(--text); outline: none;
+  }
+  .garment-list { display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 16px; }
+  .garment-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    border: 2px solid transparent;
+  }
+  .garment-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); border-color: var(--teal); }
+  .garment-img {
+    width: 72px; height: 72px;
+    border-radius: 12px;
+    font-size: 36px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .garment-info { flex: 1; }
+  .garment-title { font-size: 15px; font-weight: bold; color: var(--navy); }
+  .garment-meta { font-size: 12px; color: #666; margin-top: 3px; }
+  .garment-dist { font-size: 12px; color: var(--teal); font-weight: bold; margin-top: 4px; }
+  .avail-badge {
+    background: #e8f8f5; color: var(--teal); border-radius: 8px;
+    padding: 3px 10px; font-size: 11px; font-weight: bold;
+  }
+
+  /* ── GARMENT DETAIL ── */
+  #screen-detail { background: var(--white); }
+  .detail-gallery {
+    background: var(--accent);
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 80px;
+    position: relative;
+  }
+  .back-btn {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(255,255,255,0.85);
+    border: none; border-radius: 50%;
+    width: 36px; height: 36px;
+    font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .status-badge-avail {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--teal); color: #fff;
+    border-radius: 10px; padding: 4px 12px; font-size: 12px; font-weight: bold;
+  }
+  .detail-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .detail-title { font-size: 22px; color: var(--navy); font-weight: bold; }
+  .detail-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .detail-tag {
+    background: var(--accent); color: var(--teal);
+    border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: bold;
+    border: 1.5px solid var(--teal);
+  }
+  .detail-desc { font-size: 14px; color: #555; line-height: 1.6; }
+  .donor-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--gray); border-radius: 14px; padding: 10px 14px;
+  }
+  .donor-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--teal); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: bold;
+  }
+  .donor-name { font-weight: bold; color: var(--navy); font-size: 14px; }
+  .donor-rating { font-size: 12px; color: #888; }
+  .btn-request {
+    width: 100%; padding: 14px;
+    background: var(--teal);
+    color: #fff; border: none; border-radius: 16px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 16px; font-weight: bold;
+    cursor: pointer; transition: background .2s, transform .1s;
+    margin-top: 4px;
+  }
+  .btn-request:hover { background: var(--navy); transform: scale(1.02); }
+
+  /* ── PUBLISH SCREEN ── */
+  #screen-publish { background: var(--white); padding: 20px; gap: 14px; }
+  #screen-publish h2 { font-size: 20px; color: var(--navy); }
+  .photo-upload-row { display: flex; gap: 10px; }
+  .photo-slot {
+    width: 64px; height: 64px; border-radius: 12px;
+    border: 2.5px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; cursor: pointer; background: var(--gray);
+    transition: border .2s, background .2s;
+    color: #aaa;
+  }
+  .photo-slot.filled { background: var(--accent); border-color: var(--teal); font-size: 32px; color: unset; }
+  .photo-slot:hover { border-color: var(--teal); background: var(--accent); }
+  .section-label { font-size: 13px; color: #666; margin-bottom: 4px; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  /* ── PROFILE SCREEN ── */
+  #screen-profile { background: var(--white); }
+  .profile-header {
+    background: linear-gradient(135deg, var(--navy), var(--teal));
+    padding: 30px 20px 40px; text-align: center; color: #fff;
+    position: relative;
+  }
+  .profile-avatar-big {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; margin: 0 auto 10px;
+  }
+  .profile-name { font-size: 20px; font-weight: bold; }
+  .profile-type { font-size: 13px; opacity: 0.8; margin-top: 3px; }
+  .profile-stats {
+    display: flex; margin: -20px 16px 0;
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    padding: 14px;
+    position: relative; z-index: 2;
+  }
+  .stat-item { flex: 1; text-align: center; }
+  .stat-value { font-size: 20px; font-weight: bold; color: var(--navy); }
+  .stat-label { font-size: 11px; color: #888; }
+  .stat-divider { width: 1px; background: var(--border); }
+  .profile-body { padding: 24px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .profile-section-title { font-size: 15px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
+  .info-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--gray); border-radius: 12px; padding: 10px 14px;
+    font-size: 14px;
+  }
+  .info-row .info-icon { font-size: 18px; }
+  .btn-edit {
+    width: 100%; padding: 12px;
+    background: var(--navy);
+    color: #fff; border: none; border-radius: 14px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 15px; font-weight: bold;
+    cursor: pointer; transition: background .2s;
+    margin-top: 6px;
+  }
+  .btn-edit:hover { background: var(--teal); }
+  .rating-stars { color: #f39c12; font-size: 16px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.55); align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: #fff; border-radius: 24px 24px 0 0;
+    padding: 24px 22px 30px; width: 390px;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title { font-size: 18px; font-weight: bold; color: var(--navy); margin-bottom: 10px; }
+  .modal-desc { font-size: 13px; color: #666; margin-bottom: 14px; }
+  .modal-textarea {
+    width: 100%; min-height: 90px;
+    border: 2px solid var(--border); border-radius: 12px;
+    padding: 10px 14px;
+    font-family: 'Comic Sans MS', cursive; font-size: 14px;
+    outline: none; resize: none; color: var(--text); margin-bottom: 14px;
+  }
+  .modal-textarea:focus { border-color: var(--teal); }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; padding: 11px;
+    background: var(--gray); border: none; border-radius: 12px;
+    font-family: 'Comic Sans MS', cursive; font-size: 14px;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn-cancel:hover { background: #ddd; }
+  .btn-send {
+    flex: 2; padding: 11px;
+    background: var(--teal); color: #fff; border: none; border-radius: 12px;
+    font-family: 'Comic Sans MS', cursive; font-size: 14px; font-weight: bold;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn-send:hover { background: var(--navy); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: var(--navy); color: #fff;
+    padding: 10px 22px; border-radius: 20px;
+    font-family: 'Comic Sans MS', cursive; font-size: 13px;
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── SCROLLBAR ── */
+  .screen::-webkit-scrollbar { width: 4px; }
+  .screen::-webkit-scrollbar-track { background: transparent; }
+  .screen::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 2px; }
+
+  /* ── SUCCESS STATE ── */
+  .success-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 40px 28px; text-align: center;
+  }
+  .success-icon { font-size: 72px; }
+  .success-title { font-size: 22px; font-weight: bold; color: var(--navy); }
+  .success-sub { font-size: 14px; color: #666; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>📶 🔋</span>
+    </div>
+
+    <!-- TOP NAV -->
+    <div class="top-nav">
+      <div class="logo">DonaTex</div>
+      <div style="display:flex;gap:8px;">
+        <button class="icon-btn" onclick="showToast('🔔 No hay nuevas notificaciones')">🔔</button>
+        <button class="icon-btn" onclick="showScreen('profile')">👤</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: LOGIN -->
+    <div id="screen-login" class="screen active">
+      <div class="login-logo">
+        <h1>DonaTex</h1>
+        <p>Conectando donantes con quienes más lo necesitan 💚</p>
+      </div>
+      <div class="login-card">
+        <h2>¡Bienvenido de nuevo!</h2>
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" placeholder="tucorreo@ejemplo.com" id="login-email">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" placeholder="••••••••" id="login-pass">
+          <div class="strength-bar"><div class="strength-fill"></div></div>
+          <div class="strength-label">Contraseña fuerte 💪</div>
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Iniciar Sesión</button>
+        <div class="divider">o continuar con</div>
+        <button class="btn-social" onclick="doLogin()">🇬 Continuar con Google</button>
+        <button class="btn-social" onclick="doLogin()">📘 Continuar con Facebook</button>
+        <p style="text-align:center;font-size:12px;color:#999;margin-top:8px;">
+          <a style="color:var(--teal);cursor:pointer;" onclick="showToast('📧 Enlace enviado a tu correo')">¿Olvidaste tu contraseña?</a>
+        </p>
+      </div>
+      <p class="login-footer">¿No tienes cuenta? <a onclick="showToast('📝 Abre el formulario de registro')">Regístrate aquí</a></p>
+    </div>
+
+    <!-- SCREEN: EXPLORE -->
+    <div id="screen-explore" class="screen">
+      <div class="search-bar-wrap">
+        <div class="search-input-row">
+          <span>🔍</span>
+          <input type="text" placeholder="Buscar prendas disponibles..." id="search-input" oninput="filterGarments()">
+        </div>
+      </div>
+      <div class="filter-chips" id="filter-chips">
+        <span class="chip active" onclick="setFilter(this,'Todos')">Todos</span>
+        <span class="chip" onclick="setFilter(this,'Camisas')">👕 Camisas</span>
+        <span class="chip" onclick="setFilter(this,'Pantalones')">👖 Pantalones</span>
+        <span class="chip" onclick="setFilter(this,'Talla M')">M</span>
+        <span class="chip" onclick="setFilter(this,'Hombre')">Hombre</span>
+        <span class="chip" onclick="setFilter(this,'Mujer')">Mujer</span>
+        <span class="chip" onclick="setFilter(this,'Nuevo')">✨ Nuevo</span>
+      </div>
+      <div class="sort-row">
+        <span id="results-count">4 resultados</span>
+        <select onchange="showToast('🔄 Resultados reordenados')">
+          <option>Más cercano</option>
+          <option>Más reciente</option>
+        </select>
+      </div>
+      <div class="garment-list" id="garment-list"></div>
+    </div>
+
+    <!-- SCREEN: GARMENT DETAIL -->
+    <div id="screen-detail" class="screen">
+      <div class="detail-gallery" id="detail-emoji">
+        <button class="back-btn" onclick="showScreen('explore')">←</button>
+        <span id="detail-gallery-icon">👔</span>
+        <span class="status-badge-avail">Disponible ✓</span>
+      </div>
+      <div class="detail-body">
+        <div class="detail-title" id="detail-title">Chaqueta Denim Azul</div>
+        <div class="detail-tags" id="detail-tags">
+          <span class="detail-tag">Talla M</span>
+          <span class="detail-tag">Buen estado</span>
+          <span class="detail-tag">Unisex</span>
+          <span class="detail-tag">Donación</span>
+        </div>
+        <p class="detail-desc" id="detail-desc">Chaqueta denim en excelente estado, usada muy pocas veces. Perfecta para el día a día. La entrego limpia y lista para usar. 💙</p>
+        <div class="donor-row">
+          <div class="donor-avatar">C</div>
+          <div>
+            <div class="donor-name">Carolina M.</div>
+            <div class="donor-rating">⭐⭐⭐⭐⭐ 4.8 · Donante verificada</div>
+          </div>
+          <span style="margin-left:auto;font-size:12px;color:var(--teal);">📍 0.8 km</span>
+        </div>
+        <button class="btn-request" onclick="openModal()">
+          📦 Solicitar Donación
+        </button>
+        <div style="text-align:center;font-size:12px;color:#aaa;">Solo usuarios verificados pueden solicitar</div>
+      </div>
+    </div>
+
+    <!-- SCREEN: PUBLISH -->
+    <div id="screen-publish" class="screen">
+      <h2>📸 Publicar Prenda</h2>
+      <div>
+        <div class="section-label">Fotos (mínimo 1, máximo 5)</div>
+        <div class="photo-upload-row">
+          <div class="photo-slot filled" onclick="showToast('📷 Foto seleccionada')">👕</div>
+          <div class="photo-slot" onclick="showToast('📷 Añadir foto')">+</div>
+          <div class="photo-slot" onclick="showToast('📷 Añadir foto')">+</div>
+          <div class="photo-slot" onclick="showToast('📷 Añadir foto')">+</div>
+          <div class="photo-slot" onclick="showToast('📷 Añadir foto')">+</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Título de la prenda *</label>
+        <input type="text" placeholder="Ej: Chaqueta denim talla M" id="pub-title">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select>
+            <option value="">Tipo...</option>
+            <option>Camisa</option><option>Pantalón</option><option>Chaqueta</option>
+            <option>Vestido</option><option>Zapatos</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Talla *</label>
+          <select>
+            <option value="">Talla...</option>
+            <option>XS</option><option>S</option><option>M</option>
+            <option>L</option><option>XL</option><option>XXL</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Género *</label>
+          <select>
+            <option>Hombre</option><option>Mujer</option><option>Unisex</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado *</label>
+          <select>
+            <option>Nuevo</option><option>Muy bueno</option><option>Bueno</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descripción (opcional)</label>
+        <input type="text" placeholder="Detalles adicionales de la prenda...">
+      </div>
+      <button class="btn-primary" onclick="publishGarment()">✅ Publicar Prenda</button>
+    </div>
+
+    <!-- SCREEN: PROFILE -->
+    <div id="screen-profile" class="screen">
+      <div class="profile-header">
+        <div class="profile-avatar-big">👤</div>
+        <div class="profile-name">Carolina Martínez</div>
+        <div class="profile-type">🎽 Donante · Receptora</div>
+        <div class="rating-stars" style="margin-top:6px;">⭐⭐⭐⭐⭐ <span style="font-size:13px;">4.8</span></div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Donaciones</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Recibidas</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value">15</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-section-title">Información Personal</div>
+        <div class="info-row">
+          <span class="info-icon">✉️</span>
+          <span>carolina@email.com</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <span>Medellín, El Poblado</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📅</span>
+          <span>Miembro desde Feb 2024</span>
+        </div>
+        <div class="profile-section-title" style="margin-top:4px;">Mi Impacto 🌍</div>
+        <div style="background:var(--accent);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:bold;color:var(--teal);">12 prendas</div>
+          <div style="font-size:12px;color:#666;margin-top:4px;">donadas · equivalen a ~60kg de ropa rescatada ♻️</div>
+        </div>
+        <button class="btn-edit" onclick="showToast('✏️ Modo edición activado')">✏️ Editar Perfil</button>
+        <button class="btn-cancel" style="width:100%;margin-top:4px;border-radius:14px;padding:12px;font-size:14px;" onclick="showScreen('login')">🚪 Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <button class="nav-item" id="nav-explore" onclick="showScreen('explore')">
+        <span class="icon">🔍</span>
+        <span>Explorar</span>
+      </button>
+      <button class="nav-item" id="nav-publish" onclick="showScreen('publish')">
+        <span class="icon">➕</span>
+        <span>Publicar</span>
+      </button>
+      <button class="nav-item" id="nav-activity" onclick="showToast('📦 Mis solicitudes y chats')">
+        <span class="icon">📦</span>
+        <span>Actividad</span>
+      </button>
+      <button class="nav-item" id="nav-profile" onclick="showScreen('profile')">
+        <span class="icon">👤</span>
+        <span>Perfil</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- REQUEST MODAL -->
+<div class="modal-overlay" id="request-modal">
+  <div class="modal-card">
+    <div class="modal-title">✉️ Enviar Solicitud</div>
+    <div class="modal-desc">Escribe un mensaje de presentación al donante para iniciar la coordinación de entrega.</div>
+    <textarea class="modal-textarea" id="request-message" placeholder="Hola! Estoy interesado en esta prenda porque..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-send" onclick="sendRequest()">📨 Enviar Solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const garments = [
+    { emoji:'👔', title:'Chaqueta Denim Azul', meta:'Talla M · Buen estado · Hombre', dist:'0.8 km', bg:'#dbeafe',
+      desc:'Chaqueta denim en excelente estado, usada muy pocas veces. Perfecta para el día a día. La entrego limpia y lista para usar. 💙',
+      tags:['Talla M','Buen estado','Unisex','Donación'], donor:'Carolina M.' },
+    { emoji:'👕', title:'Camiseta Blanca Básica', meta:'Talla S · Nuevo · Mujer', dist:'1.2 km', bg:'#f0fdf4',
+      desc:'Camiseta blanca 100% algodón, nunca usada. Ideal para cualquier ocasión. ¡Quiero que le dé buen uso! 🤍',
+      tags:['Talla S','Nuevo','Mujer','Donación'], donor:'Miguel S.' },
+    { emoji:'🧥', title:'Sudadera Gris con Capucha', meta:'Talla L · Muy bueno · Unisex', dist:'2.1 km', bg:'#f5f5f5',
+      desc:'Sudadera cómoda y calentita, perfecta para el frío. En muy buen estado, la lavé antes de publicar. 🩶',
+      tags:['Talla L','Muy bueno','Unisex','Donación'], donor:'Andrés T.' },
+    { emoji:'👗', title:'Vestido Floral de Verano', meta:'Talla M · Muy bueno · Mujer', dist:'3.4 km', bg:'#fdf4ff',
+      desc:'Vestido floral precioso, ideal para ocasiones especiales o paseos. Solo usado dos veces. 🌸',
+      tags:['Talla M','Muy bueno','Mujer','Donación'], donor:'Laura G.' },
+  ];
+
+  let currentFilter = 'Todos';
+  let selectedGarment = 0;
+
+  function renderGarments(list) {
+    const container = document.getElementById('garment-list');
+    document.getElementById('results-count').textContent = list.length + ' resultado' + (list.length !== 1 ? 's' : '');
+    container.innerHTML = list.map((g,i) => `
+      <div class="garment-card" onclick="openDetail(${garments.indexOf(g)})">
+        <div class="garment-img" style="background:${g.bg}">${g.emoji}</div>
+        <div class="garment-info">
+          <div class="garment-title">${g.title}</div>
+          <div class="garment-meta">${g.meta}</div>
+          <div class="garment-dist">📍 ${g.dist}</div>
+        </div>
+        <span class="avail-badge">✓</span>
+      </div>
+    `).join('');
+  }
+
+  function filterGarments() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    let filtered = garments;
+    if (currentFilter !== 'Todos') {
+      filtered = filtered.filter(g =>
+        g.title.toLowerCase().includes(currentFilter.toLowerCase()) ||
+        g.meta.toLowerCase().includes(currentFilter.toLowerCase())
+      );
+    }
+    if (q) {
+      filtered = filtered.filter(g =>
+        g.title.toLowerCase().includes(q) || g.meta.toLowerCase().includes(q)
+      );
+    }
+    renderGarments(filtered);
+  }
+
+  function setFilter(el, val) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentFilter = val;
+    filterGarments();
+  }
+
+  function openDetail(i) {
+    selectedGarment = i;
+    const g = garments[i];
+    document.getElementById('detail-gallery-icon').textContent = g.emoji;
+    document.getElementById('detail-title').textContent = g.title;
+    document.getElementById('detail-desc').textContent = g.desc;
+    document.getElementById('detail-tags').innerHTML = g.tags.map(t => `<span class="detail-tag">${t}</span>`).join('');
+    showScreen('detail');
+  }
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navMap = { explore:'nav-explore', publish:'nav-publish', profile:'nav-profile' };
+    if (navMap[name]) document.getElementById(navMap[name]).classList.add('active');
+  }
+
+  function doLogin() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    if (!email || !pass) { showToast('⚠️ Por favor ingresa tus datos'); return; }
+    showToast('✅ ¡Bienvenido a DonaTex!');
+    setTimeout(() => showScreen('explore'), 800);
+  }
+
+  function openModal() {
+    document.getElementById('request-modal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('request-modal').classList.remove('open');
+  }
+  function sendRequest() {
+    const msg = document.getElementById('request-message').value;
+    if (!msg.trim()) { showToast('✏️ Escribe un mensaje primero'); return; }
+    closeModal();
+    showToast('📨 ¡Solicitud enviada! El donante será notificado');
+    setTimeout(() => showScreen('explore'), 1500);
+  }
+
+  function publishGarment() {
+    const title = document.getElementById('pub-title').value;
+    if (!title.trim()) { showToast('⚠️ Ingresa el título de la prenda'); return; }
+    showToast('🎉 ¡Prenda publicada con éxito!');
+    setTimeout(() => showScreen('explore'), 1000);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Init
+  renderGarments(garments);
+  showScreen('login');
+</script>
+</body>
+</html>
